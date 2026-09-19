@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blocked by Focusify</title>
+  <link rel="stylesheet" href="blocked.css">
+</head>
+<body>
+  <main class="wrap">
+    <div class="badge" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6" stroke-dasharray="2 2"></circle><circle cx="12" cy="12" r="1.5" fill="currentColor"></circle></svg>
+    </div>
+    <p class="kicker">Focusify</p>
+    <h1><span id="site">This site</span> is blocked right now</h1>
+    <p class="sub">You asked Focusify to keep streaming sites out of your way while you focus.</p>
+    <div class="actions">
+      <button id="btn-back" class="primary">← Go back</button>
+      <button id="btn-pause" class="secondary" disabled>Pause Focusify for 15 min</button>
+    </div>
+    <p id="hint" class="hint"></p>
+  </main>
+  <script src="../scripts/defaults.js"></script>
+  <script src="../scripts/sites.js"></script>
+  <script src="blocked.js"></script>
+</body>
+</html>

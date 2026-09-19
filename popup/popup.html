@@ -43,6 +43,10 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         Rules
       </button>
+      <button class="tab-btn" data-tab="sites-tab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"></line></svg>
+        Sites
+      </button>
       <button class="tab-btn" data-tab="history-tab">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
         Log
@@ -302,6 +306,41 @@
         </div>
       </section>
 
+      <!-- TAB: STREAMING SITES -->
+      <section id="sites-tab" class="tab-panel">
+        <div class="card">
+          <div class="toggle-row">
+            <div>
+              <span class="toggle-title">Block streaming sites</span>
+              <span class="toggle-subtitle">Opening them shows a Focusify page instead. Follows your schedule, pause and breaks.</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="block-sites">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <label class="form-label">Sites to block <span class="sub-label">Tap to allow or block a site</span></label>
+          <div class="site-chips" id="site-chips"></div>
+        </div>
+
+        <div class="card">
+          <label class="form-label" for="custom-domains">
+            Other sites
+            <span class="sub-label">One per line or comma separated, e.g. example.com</span>
+          </label>
+          <textarea id="custom-domains" rows="3" placeholder="example.com"></textarea>
+        </div>
+
+        <div class="card" id="perm-card" hidden>
+          <span class="toggle-title">Show a friendly blocked page</span>
+          <span class="field-hint">Without extra access the browser shows a plain "blocked" error. Allow it once and Focusify shows its own page instead. It only touches the sites listed here.</span>
+          <button class="btn btn-secondary" id="btn-grant" type="button">Allow friendly blocked page</button>
+        </div>
+      </section>
+
       <!-- TAB 4: BLOCKED LOG -->
       <section id="history-tab" class="tab-panel">
         <div class="history-header">
@@ -326,6 +365,7 @@
 
   <script src="../scripts/defaults.js"></script>
   <script src="../scripts/presets.js"></script>
+  <script src="../scripts/sites.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

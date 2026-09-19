@@ -23,6 +23,7 @@ Focusify is a Chrome extension that keeps YouTube on your topic. Tell it what yo
 | **No Shorts** | Hides Shorts in search, home and the sidebar (and the Shorts nav entry). `/shorts/…` links open in the normal player. |
 | **Watching guard** | If the video you opened is off-topic, it's paused behind a "Go back / Watch anyway / Always allow this channel" prompt. |
 | **No endless scrolling** | When a feed returns 40 off-topic videos in a row, Focusify stops loading more and offers "Load more anyway". |
+| **Streaming-site blocker** | One switch blocks Netflix, Prime Video, JioHotstar, Disney+, Hulu, Max and more, plus any sites you add. Follows your schedule, pause and breaks. See [Blocking streaming sites](#blocking-streaming-sites). |
 | **Optional local AI** | In Hybrid mode, borderline videos are double-checked by a model running on your own computer with [Ollama](https://ollama.com). Works fine without it. |
 | **Everything else** | Channel allow/block lists, hide or blur, clickbait penalties, a Pomodoro timer that relaxes filters on breaks, and a log of what was blocked and why. |
 
@@ -102,6 +103,18 @@ OLLAMA_ORIGINS="chrome-extension://*" ollama serve
 
 All defaults, including word lists, are plain data in [`scripts/defaults.js`](scripts/defaults.js). Topic presets live in [`scripts/presets.js`](scripts/presets.js). Both are safe to edit.
 
+## Blocking streaming sites
+
+Open the **Sites** tab and turn on **Block streaming sites**. From then on, opening Netflix, Prime Video, JioHotstar, Disney+, Hulu, Max, Peacock, Paramount+, Apple TV+, SonyLIV, ZEE5, MX Player, Crunchyroll or discovery+ shows a Focusify page instead of the site.
+
+- **Per site:** tap a site's chip to allow it (struck through) or block it. Add any other site in **Other sites**, one per line.
+- **Same rules as the filter:** blocking follows *Always / Schedule / Off*, *Pause 15 min*, and Pomodoro breaks. Outside your schedule, nothing is blocked.
+- **Already-open tabs:** when blocking switches on (for example, when your schedule starts), open tabs of those sites move to the blocked page.
+- **Getting around it:** the blocked page offers "Pause Focusify for 15 min" after a short wait (`siteUnlockDelaySec`, 10 s by default). It pauses the YouTube filter as well.
+- **Permission prompt:** the first time you switch it on, Chrome asks to let Focusify "read and change data on" the listed sites. That's what lets it show its own page instead of a browser error. If you decline, the sites are still blocked, but Chrome shows a plain "blocked by client" error. Focusify never reads those pages; it only redirects them.
+
+The site list is plain data in [`scripts/sites.js`](scripts/sites.js).
+
 ## How it decides
 
 1. **Channel lists** win first (allow or block).
@@ -123,6 +136,8 @@ No accounts, analytics or servers. Settings and statistics stay in your browser.
 | Everything is blocked | Lower **Sensitivity** on the Rules tab, and check your distraction words aren't too broad. |
 | Too much gets through | Add distraction words, raise Sensitivity, or use Hybrid mode with Ollama. |
 | Ollama shows Offline | Confirm it's running (`ollama list`), the endpoint is `http://localhost:11434`, and try the `OLLAMA_ORIGINS` command above. |
+| A blocked site shows a plain error page | You skipped the permission prompt. Open **Sites** and click **Allow friendly blocked page**. The site is still blocked. |
+| A streaming site isn't blocked | Check **Block streaming sites** is on, the site's chip is highlighted (not struck through), and it's within your schedule, not paused or on a break. |
 | Shorts still show up | YouTube changes its markup often. Open an issue with a screenshot. |
 | Extension broke after an update | Click the reload icon on its card at `chrome://extensions`. |
 
@@ -140,6 +155,9 @@ npm run build    # writes dist/focusify-yt-v<version>.zip
 | `scripts/logic-engine.js` | Pure, dependency-free scoring |
 | `scripts/defaults.js` | Config defaults, schedule and activation logic |
 | `scripts/presets.js` | Topic presets (data) |
+| `scripts/sites.js` | Streaming-site presets and domain helpers (data) |
+| `scripts/site-blocker.js` | Keeps the site-blocking rules in sync with your settings |
+| `blocked/` | The page shown in place of a blocked site |
 | `popup/` | Settings UI |
 | `docs/` | Store listing and privacy policy |
 | `tests/` | Unit tests |

@@ -1,12 +1,12 @@
 {
   "name": "focusify-yt",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Chrome extension that filters YouTube to your current focus topic.",
   "private": true,
   "license": "MIT",
   "scripts": {
     "test": "node --test \"tests/*.test.js\"",
     "icons": "node tools/generate_icons.js",
-    "build": "mkdir -p dist && rm -f dist/*.zip && zip -r \"dist/focusify-yt-v$npm_package_version.zip\" manifest.json icons popup scripts styles -x '*.DS_Store'"
+    "build": "mkdir -p dist && rm -f dist/*.zip && zip -r \"dist/focusify-yt-v$npm_package_version.zip\" manifest.json icons popup scripts styles blocked -x '*.DS_Store'"
   }
 }

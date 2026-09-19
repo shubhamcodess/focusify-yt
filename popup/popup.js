@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     initActivationCard(config);
+    initSitesTab(config);
     await fetchOllamaModels();
     await loadPomodoroState();
   }
@@ -190,6 +191,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     masterToggle.addEventListener('change', render);
     render();
+  }
+
+
+  // Streaming-site blocking tab. Every change saves immediately; the service worker rebuilds the rules.
+  async function initSitesTab(config) {
+    const master = document.getElementById('block-sites');
+    const chipBox = document.getElementById('site-chips');
+    const customEl = document.getElementById('custom-domains');
+    const permCard = document.getElementById('perm-card');
+    const btnGrant = document.getElementById('btn-grant');
+    let unblocked = new Set(Array.isArray(config.unblockedSiteIds) ? config.unblockedSiteIds : []);
+
+    master.checked = Boolean(config.blockSites);
+    customEl.value = focusifyParseDomainList(config.customBlockedDomains).join('\n');
+
+    const currentConfig = () => ({ ...config, unblockedSiteIds: [...unblocked], customBlockedDomains: customEl.value });
+    const origins = () => focusifyBlockedDomains(currentConfig()).map(d => `*://*.${d}/*`);
+
+    async function refreshPermCard() {
+      if (!master.checked) { permCard.hidden = true; return; }
+      const list = origins();
+      const granted = list.length === 0 || await chrome.permissions.contains({ origins: list });
+      permCard.hidden = granted;
+    }
+
+    function renderChips() {
+      chipBox.replaceChildren(...FOCUSIFY_SITE_PRESETS.map(site => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'site-chip' + (unblocked.has(site.id) ? '' : ' on');
+        chip.textContent = site.name;
+        chip.setAttribute('aria-pressed', String(!unblocked.has(site.id)));
+        chip.addEventListener('click', () => {
+          if (unblocked.has(site.id)) unblocked.delete(site.id); else unblocked.add(site.id);
+          chrome.storage.sync.set({ unblockedSiteIds: [...unblocked] });
+          renderChips();
+          refreshPermCard();
+        });
+        return chip;
+      }));
+    }
+
+    // Ask for access (needs a user gesture) so blocked sites get the friendly page. Blocking works either way.
+    function requestAccess() {
+      const list = origins();
+      if (!list.length) return Promise.resolve(true);
+      return chrome.permissions.request({ origins: list }).catch(() => false);
+    }
+
+    master.addEventListener('change', async () => {
+      const on = master.checked;
+      const asked = on ? requestAccess() : null; // start the prompt inside the click gesture
+      await chrome.storage.sync.set({ blockSites: on });
+      if (asked) await asked;
+      refreshPermCard();
+    });
+
+    customEl.addEventListener('change', async () => {
+      const cleaned = focusifyParseDomainList(customEl.value);
+      customEl.value = cleaned.join('\n');
+      await chrome.storage.sync.set({ customBlockedDomains: cleaned.join(', ') });
+      refreshPermCard();
+    });
+
+    btnGrant.addEventListener('click', async () => {
+      await requestAccess();
+      refreshPermCard();
+    });
+
+    renderChips();
+    refreshPermCard();
   }
 
   // 7. Fetch installed Ollama models. Options come only from the server plus the saved choice.

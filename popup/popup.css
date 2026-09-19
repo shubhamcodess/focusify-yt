@@ -91,8 +91,8 @@ input:focus-visible + .slider { outline: 2px solid var(--accent); outline-offset
 }
 .tab-btn {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 7px 4px; border: 0; border-radius: var(--radius-sm); background: transparent;
-  color: var(--text-dim); font-weight: 600; font-size: 12px; transition: background 0.15s, color 0.15s;
+  padding: 7px 2px; border: 0; border-radius: var(--radius-sm); background: transparent;
+  color: var(--text-dim); font-weight: 600; font-size: 11.5px; transition: background 0.15s, color 0.15s;
 }
 .tab-btn:hover { color: var(--text); }
 .tab-btn.active { background: var(--accent-soft); color: var(--accent); }
@@ -245,3 +245,13 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .save-status.show { opacity: 1; transform: translate(-50%, 0); }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---------- Streaming sites ---------- */
+.site-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.site-chip {
+  padding: 5px 11px; border-radius: 99px; background: var(--surface-2); color: var(--text-dim);
+  border: 1px solid var(--border); font-size: 12px; text-decoration: line-through; transition: background 0.15s, border-color 0.15s;
+}
+.site-chip.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 600; }
+.site-chip:hover { border-color: var(--accent); }
+#perm-card[hidden] { display: none; }

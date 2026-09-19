@@ -33,6 +33,11 @@ const FOCUSIFY_DEFAULTS = {
   scheduleStart: '09:00',
   scheduleEnd: '18:00',
   feedPatience: 40, // pause infinite scroll after this many filtered videos in a row (0 = never)
+  // Streaming-site blocking (opt-in). Follows the same mode, schedule and pause as the YouTube filter.
+  blockSites: false,
+  unblockedSiteIds: [], // preset sites the user turned off; empty means all presets are blocked
+  customBlockedDomains: '', // extra hostnames, comma or newline separated
+  siteUnlockDelaySec: 10, // wait before the blocked page offers a 15-minute pause
   pausedUntil: 0 // epoch ms; filtering is suspended until then
 };
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0
+
+- Streaming-site blocker: one switch blocks Netflix, Prime Video, JioHotstar, Disney+, Hulu, Max and more, with per-site toggles and custom domains.
+- Follows the same Always / Schedule / Off, pause and Pomodoro-break logic as the YouTube filter.
+- Friendly blocked page with a short wait before the 15-minute pause. Works without extra permission (plain block) and upgrades to the friendly page when the optional access is granted.
+- New `alarms` permission (schedule boundaries) and optional site access requested only when the feature is turned on.
+
 ## 1.1.0
 
 - Zero-flash filtering: videos stay hidden until they are scored.

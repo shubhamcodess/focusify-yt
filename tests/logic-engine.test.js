@@ -115,3 +115,56 @@ test('package.json and manifest.json versions stay in sync', () => {
   const manifest = require('../manifest.json');
   assert.equal(pkg.version, manifest.version);
 });
+
+test('site helpers normalize and match domains', () => {
+  require('../scripts/sites.js');
+  assert.equal(focusifyNormalizeDomain('https://www.Netflix.com/browse?x=1'), 'netflix.com');
+  assert.equal(focusifyNormalizeDomain('example.co.uk'), 'example.co.uk');
+  assert.equal(focusifyNormalizeDomain('not a domain'), '');
+  assert.equal(focusifyNormalizeDomain('localhost'), '');
+  assert.equal(focusifyNormalizeDomain('javascript:alert(1)'), '');
+  assert.deepEqual(focusifyParseDomainList('a.com, https://www.b.org/x\nA.com  bad_one'), ['a.com', 'b.org']);
+  assert.equal(focusifyHostMatches('www.netflix.com', ['netflix.com']), true);
+  assert.equal(focusifyHostMatches('notnetflix.com', ['netflix.com']), false);
+});
+
+test('blocked domains: presets minus opt-outs plus custom', () => {
+  require('../scripts/sites.js');
+  const all = focusifyBlockedDomains(cfg());
+  assert.ok(all.includes('netflix.com') && all.includes('primevideo.com') && all.includes('hotstar.com'));
+  const some = focusifyBlockedDomains(cfg({ unblockedSiteIds: ['netflix'], customBlockedDomains: 'foo.tv' }));
+  assert.ok(!some.includes('netflix.com') && some.includes('foo.tv'));
+});
+
+test('site presets are well-formed and have unique ids/domains', () => {
+  require('../scripts/sites.js');
+  const ids = new Set(), doms = new Set();
+  for (const p of globalThis.FOCUSIFY_SITE_PRESETS) {
+    assert.ok(p.id && p.name && p.domains.length);
+    assert.ok(!ids.has(p.id)); ids.add(p.id);
+    for (const d of p.domains) { assert.equal(focusifyNormalizeDomain(d), d); assert.ok(!doms.has(d)); doms.add(d); }
+  }
+});
+
+test('every file the manifest references exists and ships in the build', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const root = path.join(__dirname, '..');
+  const manifest = require('../manifest.json');
+  const pkg = require('../package.json');
+
+  const refs = [
+    manifest.background.service_worker, manifest.action.default_popup,
+    ...Object.values(manifest.icons),
+    ...manifest.content_scripts.flatMap(c => [...c.js, ...(c.css || [])]),
+    ...(manifest.web_accessible_resources || []).flatMap(w => w.resources)
+  ];
+  for (const f of refs) assert.ok(fs.existsSync(path.join(root, f)), `missing ${f}`);
+
+  // Each top-level folder or file referenced must be part of the zip command.
+  const zipped = pkg.scripts.build;
+  for (const f of refs) {
+    const top = f.split('/')[0];
+    assert.ok(zipped.includes(top), `build script does not package "${top}" (needed for ${f})`);
+  }
+});

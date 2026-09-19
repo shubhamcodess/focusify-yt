@@ -1,4 +1,4 @@
-importScripts('/scripts/defaults.js', '/scripts/logic-engine.js');
+importScripts('/scripts/defaults.js', '/scripts/logic-engine.js', '/scripts/sites.js', '/scripts/site-blocker.js');
 
 const DEFAULT_CONFIG = FOCUSIFY_DEFAULTS;
 

@@ -12,7 +12,7 @@ Settings (topic, keywords, channel lists, schedule), statistics (counts of video
 
 - It does not collect, transmit, sell or share personal information, browsing history or analytics.
 - It has no accounts, servers or tracking.
-- It does not read any site other than youtube.com.
+- It does not read the content of any site other than youtube.com. If you enable site blocking, it redirects the sites on your block list but does not read them.
 
 ## Optional AI (Ollama)
 
@@ -23,6 +23,8 @@ If you enable the AI or Hybrid mode, the titles and channel names of YouTube vid
 - `storage`: save your settings and statistics locally.
 - `declarativeNetRequest`: adjust request headers on the extension's own requests to your local Ollama server.
 - Access to `youtube.com` and `localhost:11434`: read video titles on YouTube and talk to your local Ollama.
+- `alarms`: check once a minute whether your focus schedule or pause has started or ended.
+- Optional access to the streaming sites you choose to block: requested only if you turn on site blocking, used only to redirect those sites to Focusify's own blocked page. Focusify does not read, store or transmit the content of those pages or your visits to them.
 
 ## Changes and contact
 
