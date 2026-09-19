@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focusify YouTube</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="6" stroke-dasharray="2 2"></circle>
+            <polygon points="10,8 16,12 10,16" fill="currentColor"></polygon>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>Focusify <span>YT</span></h1>
+          <span class="tagline">Study topic in. Distractions out.</span>
+        </div>
+      </div>
+      <label class="toggle-switch" title="Toggle Extension On/Off" id="master-toggle-label">
+        <input type="checkbox" id="master-toggle" checked>
+        <span class="slider"></span>
+      </label>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="focus-tab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>
+        Focus
+      </button>
+      <button class="tab-btn" data-tab="engine-tab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        Engine
+      </button>
+      <button class="tab-btn" data-tab="rules-tab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        Rules
+      </button>
+      <button class="tab-btn" data-tab="history-tab">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
+        Log
+      </button>
+    </nav>
+
+    <!-- Main Content Panels -->
+    <main class="content-body">
+      <!-- TAB 1: FOCUS DASHBOARD -->
+      <section id="focus-tab" class="tab-panel active">
+        <!-- When Focusify is active -->
+        <div class="card state-card">
+          <div class="pomo-title-text">🎯 When to filter</div>
+          <div class="state-seg" id="state-seg">
+            <button data-state="on">Always</button>
+            <button data-state="auto">Schedule</button>
+            <button data-state="off">Off</button>
+          </div>
+          <div id="schedule-fields" class="schedule-fields" hidden>
+            <div class="day-row" id="day-row">
+              <button data-day="1">M</button><button data-day="2">T</button><button data-day="3">W</button><button data-day="4">T</button><button data-day="5">F</button><button data-day="6">S</button><button data-day="0">S</button>
+            </div>
+            <div class="time-row">
+              <input type="time" id="schedule-start"> <span>to</span> <input type="time" id="schedule-end">
+            </div>
+          </div>
+          <div class="state-footer">
+            <span id="state-status" class="state-status"></span>
+            <button id="btn-pause" class="pause-btn">Pause 15 min</button>
+          </div>
+        </div>
+
+        <!-- Compact Pomodoro Timer Widget -->
+        <div class="card pomo-card compact">
+          <div class="pomo-header-row">
+            <div>
+              <div class="pomo-title-text">⏱️ Focus Session Timer</div>
+              <div class="pomo-subtitle-text">Work in focused sprints, then take a break</div>
+            </div>
+            <span class="pomo-mode-tag" id="pomo-mode-tag">Focus Session</span>
+          </div>
+
+          <div class="pomo-inline-row">
+            <span class="pomo-time" id="pomo-timer-text">25:00</span>
+            <div class="pomo-controls">
+              <button class="btn btn-primary small" id="btn-pomo-toggle">▶ Start</button>
+              <button class="btn btn-secondary small" id="btn-pomo-reset">🔄 Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <label class="form-label" for="focus-genre">
+            Active Study / Focus Genre
+            <span class="tooltip-icon" title="The subject you are focusing on right now">?</span>
+          </label>
+          <div class="input-with-presets">
+            <input type="text" id="focus-genre" placeholder="What are you studying or working on?">
+          </div>
+          <div class="genre-presets" id="genre-presets" aria-label="Topic presets"></div>
+        </div>
+
+        <div class="card">
+          <label class="form-label" for="positive-keywords">
+            Positive Keywords & Topics
+            <span class="sub-label">Comma separated (Boosts score)</span>
+          </label>
+          <textarea id="positive-keywords" rows="2" placeholder="Words that mark videos you want (comma separated)"></textarea>
+        </div>
+
+        <div class="card">
+          <label class="form-label" for="negative-keywords">
+            Distractions & Blocklist Tags
+            <span class="sub-label">Comma separated (Immediately penalized)</span>
+          </label>
+          <textarea id="negative-keywords" rows="2" placeholder="Words that mark videos you don't want (comma separated)"></textarea>
+        </div>
+
+        <!-- Live Statistics Panel -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="stat-scanned">0</span>
+            <span class="stat-label">Videos Scanned</span>
+          </div>
+          <div class="stat-card highlight">
+            <span class="stat-value" id="stat-blocked">0</span>
+            <span class="stat-label">Blocked</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-logic">0</span>
+            <span class="stat-label">Pure Logic</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-ai">0</span>
+            <span class="stat-label">AI Engine</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: ENGINE & OLLAMA AI -->
+      <section id="engine-tab" class="tab-panel">
+        <div class="card">
+          <label class="form-label">Classification Engine Mode</label>
+          <div class="mode-selector">
+            <button class="mode-opt" data-mode="logic">
+              <span class="mode-title">⚡ Pure Logic</span>
+              <span class="mode-desc">Ultra-fast keyword & heuristic matching</span>
+            </button>
+            <button class="mode-opt" data-mode="ai">
+              <span class="mode-title">🤖 Pure AI Mode</span>
+              <span class="mode-desc">On-device LLM evaluates every video</span>
+            </button>
+            <button class="mode-opt active" data-mode="hybrid">
+              <span class="mode-title">🔥 Hybrid (Recommended)</span>
+              <span class="mode-desc">Fast logic pre-filter + AI verification</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Provider Panel: Ollama -->
+        <div class="card ollama-card" id="provider-ollama-panel">
+          <div class="card-header">
+            <h3>Ollama (local AI)</h3>
+            <span class="status-badge disconnected" id="ollama-status">
+              <span class="status-dot"></span> Checking
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ollama-endpoint">Ollama API Endpoint</label>
+            <input type="text" id="ollama-endpoint">
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-action">
+              <label class="form-label" for="ollama-model-select">Ollama Model</label>
+              <button class="btn-text" id="btn-refresh-models">🔄 Refresh Models</button>
+            </div>
+            <select id="ollama-model-select" class="form-select">
+              <option value="">Connect to Ollama to list models</option>
+            </select>
+          </div>
+
+          <button class="btn btn-secondary" id="btn-test-ollama">
+            Test Ollama Connection
+          </button>
+        </div>
+
+      </section>
+
+      <!-- TAB 3: RULES & CHANNELS -->
+      <section id="rules-tab" class="tab-panel">
+        <div class="card">
+          <label class="form-label" for="whitelisted-channels">
+            ⭐ Channel Whitelist (Always Allowed)
+            <span class="sub-label">Comma separated channel names</span>
+          </label>
+          <textarea id="whitelisted-channels" rows="2" placeholder="Channel names, comma separated"></textarea>
+        </div>
+
+        <div class="card">
+          <label class="form-label" for="blacklisted-channels">
+            🚫 Channel Blacklist (Always Blocked)
+            <span class="sub-label">Comma separated channel names</span>
+          </label>
+          <textarea id="blacklisted-channels" rows="2" placeholder="Channel names, comma separated"></textarea>
+        </div>
+
+        <div class="card">
+          <div class="slider-header">
+            <label class="form-label" for="threshold-slider">
+              Relevance Filter Sensitivity
+            </label>
+            <span class="slider-value" id="threshold-val"></span>
+          </div>
+          <input type="range" id="threshold-slider" min="10" max="95" step="5">
+          <span class="field-hint">Lower values let more related videos through; higher values are stricter.</span>
+        </div>
+
+        <div class="card">
+          <label class="form-label">Filter Visual Action</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="filter-action" value="hide" checked>
+              <span><strong>Hide Completely</strong> (Removes card from YouTube layout)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="filter-action" value="blur">
+              <span><strong>Soft Blur Card</strong> (Blurs card with "Show Anyway" hover overlay)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toggle-row">
+            <div>
+              <span class="toggle-title">Show engine badges (debug)</span>
+              <span class="toggle-subtitle">Debug view: shows each video's engine and score</span>
+            </div>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="show-badges">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toggle-row">
+            <div>
+              <span class="toggle-title">Enable AI Takeaways Button</span>
+              <span class="toggle-subtitle">Adds 💡 Takeaways summary chip on allowed study videos</span>
+            </div>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="enable-takeaways" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toggle-row">
+            <div>
+              <span class="toggle-title">Block Clickbait & ALL-CAPS Titles</span>
+              <span class="toggle-subtitle">Penalizes exaggerated titles, excessive '!!!', OMG buzzwords</span>
+            </div>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="block-clickbait" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toggle-row">
+            <div>
+              <span class="toggle-title">Guard the video I'm watching</span>
+              <span class="toggle-subtitle">Pauses off-topic videos with a "Go back / Watch anyway" prompt</span>
+            </div>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="filter-current-video">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toggle-row">
+            <div>
+              <span class="toggle-title">Remove Shorts</span>
+              <span class="toggle-subtitle">Hides Shorts in search, home and the sidebar, and opens Shorts links in the normal player</span>
+            </div>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="block-shorts" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: BLOCKED LOG -->
+      <section id="history-tab" class="tab-panel">
+        <div class="history-header">
+          <span>Recently Blocked Items</span>
+          <button class="btn-text" id="btn-clear-stats">Clear History</button>
+        </div>
+        <div class="blocked-list" id="blocked-list">
+          <div class="empty-state">No videos blocked yet in this session.</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer Action Bar -->
+    <footer class="app-footer">
+      <div id="save-status" class="save-status">Settings saved</div>
+      <div class="footer-actions">
+        <button class="btn btn-secondary" id="btn-save-only">Save</button>
+        <button class="btn btn-primary" id="btn-save-reload">⚡ Apply & Reload Page</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="../scripts/defaults.js"></script>
+  <script src="../scripts/presets.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

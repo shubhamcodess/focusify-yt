@@ -1,0 +1,348 @@
+/* 0. Zero-flash gate: while Focusify is active, cards stay invisible until scored.
+   The animation is a fail-safe that reveals any card still unscored after 600ms. */
+@keyframes focusify-failsafe-reveal { to { opacity: 1; } }
+
+html[data-focusify="on"] :is(
+  ytd-rich-item-renderer, ytd-compact-video-renderer, ytd-video-renderer,
+  ytd-grid-video-renderer, ytd-playlist-video-renderer, yt-lockup-view-model,
+  ytd-rich-grid-media
+):not([data-focusify-evaluated]) {
+  opacity: 0;
+  animation: focusify-failsafe-reveal 0s linear 600ms forwards;
+}
+
+/* Hide known Shorts elements immediately (JS also finds them structurally by their links). */
+html[data-focusify-noshorts] :is(
+  ytd-reel-shelf-renderer, ytm-shorts-lockup-view-model, ytm-shorts-lockup-view-model-v2,
+  grid-shelf-view-model:has(a[href*="/shorts/"]):not(:has(a[href*="/watch?v="])),
+  ytd-rich-section-renderer:has(a[href*="/shorts/"]):not(:has(a[href*="/watch?v="])),
+  ytd-guide-entry-renderer:has(a[href^="/shorts"]), ytd-mini-guide-entry-renderer:has(a[href^="/shorts"])
+) { display: none !important; }
+
+/* Focusify YouTube Content Script Styles */
+
+/* 1. Complete Hide Mode */
+.focusify-hidden {
+  display: none !important;
+}
+
+/* 2. Soft Blur Mode */
+.focusify-blurred {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.focusify-blurred > *:not(.focusify-blur-overlay) {
+  filter: blur(10px) opacity(0.25) grayscale(0.9) !important;
+  pointer-events: none !important;
+  transition: filter 0.3s ease !important;
+}
+
+.focusify-blur-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 100 !important;
+  background: rgba(12, 12, 18, 0.94) !important;
+  backdrop-filter: blur(8px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 59, 48, 0.3) !important;
+  color: #F2F2F7 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  animation: focusifyFadeIn 0.25s ease;
+}
+
+@keyframes focusifyFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.focusify-overlay-engine-chip {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+  padding: 2px 8px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #0A84FF !important;
+  margin-bottom: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.focusify-overlay-engine-chip.ai-chip {
+  color: #34C759 !important;
+  border-color: rgba(52, 199, 89, 0.3) !important;
+  background: rgba(52, 199, 89, 0.12) !important;
+}
+
+.focusify-blur-overlay .focusify-overlay-title {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #FF3B30 !important;
+  margin-bottom: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.focusify-blur-overlay .focusify-overlay-reason {
+  font-size: 11px !important;
+  color: #D1D1D6 !important;
+  margin-bottom: 10px !important;
+  line-height: 1.35 !important;
+  max-width: 90% !important;
+}
+
+.focusify-overlay-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.focusify-blur-overlay .focusify-unblock-btn,
+.focusify-blur-overlay .focusify-chan-btn {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 8px !important;
+  padding: 5px 10px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.focusify-blur-overlay .focusify-unblock-btn:hover {
+  background: #FF3B30 !important;
+  border-color: #FF3B30 !important;
+}
+
+.focusify-blur-overlay .focusify-chan-btn:hover {
+  background: #34C759 !important;
+  border-color: #34C759 !important;
+}
+
+/* 3. Visual Confirmation Card Badge (Top Left Corner of Thumbnail) */
+.focusify-card-badge {
+  position: absolute !important;
+  top: 8px !important;
+  left: 8px !important;
+  z-index: 90 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: rgba(15, 15, 24, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 6px !important;
+  padding: 3px 7px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  backdrop-filter: blur(6px) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+  pointer-events: auto !important;
+}
+
+.focusify-card-badge.allowed {
+  border-color: rgba(52, 199, 89, 0.4) !important;
+  color: #34C759 !important;
+}
+
+.focusify-card-badge.blocked {
+  border-color: rgba(255, 59, 48, 0.4) !important;
+  color: #FF3B30 !important;
+}
+
+/* 4. AI Key Takeaways Button & Floating Modal */
+.focusify-takeaway-btn {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 8px !important;
+  z-index: 95 !important;
+  background: rgba(10, 132, 255, 0.9) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 12px !important;
+  padding: 3px 9px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  backdrop-filter: blur(6px) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+  transition: all 0.2s ease !important;
+}
+
+.focusify-takeaway-btn:hover {
+  background: #007AFF !important;
+  transform: scale(1.04);
+}
+
+.focusify-takeaways-modal {
+  position: absolute !important;
+  bottom: 36px !important;
+  left: 8px !important;
+  width: 320px !important;
+  max-width: 90% !important;
+  z-index: 120 !important;
+  background: rgba(18, 18, 28, 0.96) !important;
+  border: 1px solid rgba(10, 132, 255, 0.4) !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(14px) !important;
+  color: #F4F4F5 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  animation: focusifyFadeIn 0.25s ease;
+}
+
+.focusify-takeaways-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-weight: 700 !important;
+  color: #0A84FF !important;
+  margin-bottom: 8px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding-bottom: 4px !important;
+}
+
+.focusify-takeaways-close {
+  background: none !important;
+  border: none !important;
+  color: #A1A1AA !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+}
+
+.focusify-takeaways-body {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  color: #E4E4E7 !important;
+}
+
+/* 5. Floating YouTube Focus Header Indicator */
+#focusify-header-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(25, 25, 38, 0.95), rgba(14, 14, 22, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 4px 14px 4px 10px;
+  margin-left: 14px;
+  color: #E4E4E7;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  user-select: none;
+  z-index: 1000;
+  transition: all 0.2s ease;
+}
+
+#focusify-header-bar:hover {
+  border-color: rgba(255, 59, 48, 0.4);
+  box-shadow: 0 6px 18px rgba(255, 59, 48, 0.2);
+}
+
+.focusify-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #34C759;
+  box-shadow: 0 0 8px #34C759;
+  animation: focusifyPulse 2s infinite;
+}
+
+.focusify-status-dot.break-mode {
+  background-color: #FF9500 !important;
+  box-shadow: 0 0 8px #FF9500 !important;
+}
+
+@keyframes focusifyPulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.focusify-engine-tag {
+  background: rgba(10, 132, 255, 0.18);
+  color: #0A84FF;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.focusify-genre-pill {
+  color: #F4F4F5;
+  font-weight: 700;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.focusify-blocked-chip {
+  background: rgba(255, 59, 48, 0.18);
+  color: #FF453A;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.focusify-pomo-chip {
+  background: rgba(255, 149, 0, 0.18);
+  color: #FF9500;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* Guard shown over the player when the current video is off-topic */
+#focusify-current-guard {
+  position: absolute; inset: 0; z-index: 2500; display: grid; place-items: center;
+  background: rgba(10, 11, 16, 0.94); color: #f2f3f7; font-family: Roboto, Arial, sans-serif;
+}
+.focusify-guard-card { max-width: 480px; padding: 24px; text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.focusify-guard-kicker { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9db0; }
+.focusify-guard-title { font-size: 18px; font-weight: 600; line-height: 1.3; }
+.focusify-guard-reason { font-size: 13px; color: #ff8a95; }
+.focusify-guard-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+.focusify-guard-actions button {
+  padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08); color: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.focusify-guard-actions button:hover { background: rgba(255,255,255,0.16); }
+.focusify-guard-back { background: #5b62f0 !important; border-color: transparent !important; }
+
+/* Shown in place of the loader when a feed keeps returning only off-topic videos */
+.focusify-feed-end {
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  margin: 24px auto; padding: 14px 18px; max-width: 640px; border-radius: 12px;
+  background: rgba(124, 131, 255, 0.12); color: var(--yt-spec-text-primary, #f2f3f7);
+  font: 14px Roboto, Arial, sans-serif; text-align: center;
+}
+.focusify-feed-end button {
+  padding: 7px 14px; border-radius: 18px; border: 0; cursor: pointer;
+  background: #5b62f0; color: #fff; font-weight: 500;
+}
+.focusify-feed-end button:hover { background: #7c83ff; }
