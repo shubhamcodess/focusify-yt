@@ -255,3 +255,9 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .site-chip.on { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); text-decoration: none; font-weight: 600; }
 .site-chip:hover { border-color: var(--accent); }
 #perm-card[hidden] { display: none; }
+
+.ai-notice { padding: 10px 12px; border-radius: var(--radius-sm); font-size: 12px; background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); }
+.ai-notice[hidden] { display: none; }
+
+.app-header { position: relative; }
+.version-tag { position: absolute; right: 20px; bottom: -2px; font-size: 10px; color: var(--text-dim); opacity: 0.8; font-variant-numeric: tabular-nums; }

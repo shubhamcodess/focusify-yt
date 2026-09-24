@@ -13,10 +13,15 @@ Focusify is a Chrome extension that keeps YouTube on your topic. Tell it what yo
 - [Troubleshooting](#troubleshooting)
 - [Development and releasing](#development-and-releasing)
 
+<p align="center">
+  <img src="docs/media/showcase.webp" alt="Focusify on the YouTube home page" width="800">
+</p>
+
 ## What it does
 
 | Feature | What you get |
 |---|---|
+| **Two filter styles** | *Strict* judges every video against your topic. *Discover* uses the same Sensitivity threshold, but lets the AI accept related and adjacent topics from new channels. See [Filter style](#filter-style-strict-or-discover). |
 | **Topic-driven filtering** | Set a focus topic, keywords to boost and words to block. Nothing is preset, and it works for any subject. |
 | **Invisible** | Videos stay hidden until they are checked, so distractions never flash on screen. |
 | **Modes** | Always on, on a weekly schedule (overnight windows too), or off. "Pause 15 min" is one click away. |
@@ -67,7 +72,7 @@ That's all you need. The AI setup below is optional.
 
 ## Optional: local AI with Ollama
 
-Without Ollama, Focusify uses its built-in logic engine (keywords, topic match, clickbait signals). With Ollama, videos that the logic engine can't clearly judge are checked by a small local model, which is more accurate on unusual titles. Nothing leaves your computer.
+Without Ollama, Focusify uses its built-in logic engine (keywords, topic match, clickbait signals). If Ollama stops or isn't running, Focusify notices, skips it for a minute at a time (no slow waits), and falls back to the built-in matching automatically. The popup shows a notice, and the AI checks resume by themselves once Ollama is back. With Ollama, videos that the logic engine can't clearly judge are checked by a small local model, which is more accurate on unusual titles. Nothing leaves your computer.
 
 1. **Install Ollama** from [ollama.com/download](https://ollama.com/download) (macOS, Windows or Linux).
 2. **Download a model** (a small one is fine):
@@ -99,9 +104,31 @@ OLLAMA_ORIGINS="chrome-extension://*" ollama serve
 - **Hide or blur:** hide removes cards completely; blur keeps them with a "Show Video" overlay.
 - **Guard the video I'm watching (Rules tab):** turn off if you only want feed filtering.
 - **Pomodoro:** during a break, filters relax automatically.
+- **Takeaways chip:** allowed videos show a 💡 chip in the thumbnail's top-right corner. Hover or click it for a short AI summary (needs Ollama). Turn it off in the Rules tab.
+- **Version:** the popup header shows the installed version in its bottom-right corner, which is handy when reporting issues.
 - **Log tab:** see what was blocked and why, which is handy for tuning your keywords.
 
 All defaults, including word lists, are plain data in [`scripts/defaults.js`](scripts/defaults.js). Topic presets live in [`scripts/presets.js`](scripts/presets.js). Both are safe to edit.
+
+## Filter style: Strict or Discover
+
+Set it in the **Rules** tab under **Filter style**.
+
+| | Strict (default) | Discover |
+|---|---|---|
+| Videos scoring at or above your **Sensitivity** | Shown | Shown, with no AI call |
+| Videos below it (Hybrid/AI mode, Ollama running) | Judged by the AI against your topic only | Judged by the AI, which also accepts related and adjacent topics |
+| Can the AI override the threshold? | Yes | No: the AI's own score must also reach your threshold |
+| Ollama off, or Logic mode | Logic verdict | Logic verdict |
+
+Tips:
+
+- A video with no topic signal at all scores about 45%. If those get through, raise **Sensitivity** to around 50.
+- To widen your feed, lower Sensitivity or use Discover with Ollama running.
+
+## When Ollama isn't running
+
+Focusify keeps working. After one failed AI call it skips Ollama for a minute at a time, so pages don't slow down, and falls back to the built-in engine, which matches related word forms (for example "designing" and "design"). The popup shows a notice, and AI checks resume by themselves once Ollama is back. The off-topic prompt on a video page only appears for clear signals (a word or channel you blocked, or an AI verdict), never for a weak guess made without the AI.
 
 ## Blocking streaming sites
 
@@ -134,6 +161,7 @@ No accounts, analytics or servers. Settings and statistics stay in your browser.
 |---|---|
 | Nothing gets filtered | Check the master switch and "When to filter" aren't Off or Paused, and that a topic is set. Reload the YouTube tab. |
 | Everything is blocked | Lower **Sensitivity** on the Rules tab, and check your distraction words aren't too broad. |
+| Unrelated videos still show ("Logic 45%") | General content scores about 45%. Raise **Sensitivity** to around 50 in the Rules tab. |
 | Too much gets through | Add distraction words, raise Sensitivity, or use Hybrid mode with Ollama. |
 | Ollama shows Offline | Confirm it's running (`ollama list`), the endpoint is `http://localhost:11434`, and try the `OLLAMA_ORIGINS` command above. |
 | A blocked site shows a plain error page | You skipped the permission prompt. Open **Sites** and click **Allow friendly blocked page**. The site is still blocked. |

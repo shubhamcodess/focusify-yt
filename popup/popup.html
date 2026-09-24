@@ -27,6 +27,7 @@
         <input type="checkbox" id="master-toggle" checked>
         <span class="slider"></span>
       </label>
+      <span class="version-tag" id="app-version"></span>
     </header>
 
     <!-- Navigation Tabs -->
@@ -57,6 +58,8 @@
     <main class="content-body">
       <!-- TAB 1: FOCUS DASHBOARD -->
       <section id="focus-tab" class="tab-panel active">
+        <div id="ai-notice" class="ai-notice" hidden>Ollama isn't running, so Focusify is using its built-in smart matching. Start Ollama to bring AI checks back.</div>
+
         <!-- When Focusify is active -->
         <div class="card state-card">
           <div class="pomo-title-text">🎯 When to filter</div>
@@ -224,6 +227,20 @@
           </div>
           <input type="range" id="threshold-slider" min="10" max="95" step="5">
           <span class="field-hint">Lower values let more related videos through; higher values are stricter.</span>
+        </div>
+
+        <div class="card">
+          <label class="form-label">Filter style</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="filter-style" value="discover">
+              <span><strong>Discover</strong> (Your threshold applies, but related and adjacent topics from new channels are welcome)</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="filter-style" value="strict" checked>
+              <span><strong>Strict focus</strong> (Judges videos against your topic only)</span>
+            </label>
+          </div>
         </div>
 
         <div class="card">

@@ -168,8 +168,8 @@ html[data-focusify-noshorts] :is(
 /* 4. AI Key Takeaways Button & Floating Modal */
 .focusify-takeaway-btn {
   position: absolute !important;
-  bottom: 8px !important;
-  left: 8px !important;
+  top: 8px !important;
+  right: 8px !important;
   z-index: 95 !important;
   background: rgba(10, 132, 255, 0.9) !important;
   color: #FFFFFF !important;
@@ -192,8 +192,8 @@ html[data-focusify-noshorts] :is(
 
 .focusify-takeaways-modal {
   position: absolute !important;
-  bottom: 36px !important;
-  left: 8px !important;
+  top: 36px !important;
+  right: 8px !important;
   width: 320px !important;
   max-width: 90% !important;
   z-index: 120 !important;

@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   // UI Elements
+  document.getElementById('app-version').textContent = `v${chrome.runtime.getManifest().version}`;
   const masterToggle = document.getElementById('master-toggle');
   const focusGenreInput = document.getElementById('focus-genre');
   const positiveKeywordsInput = document.getElementById('positive-keywords');
@@ -110,6 +111,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     enableTakeawaysInput.checked = config.enableTakeaways;
     ollamaEndpointInput.value = config.ollamaEndpoint;
     savedModelName = config.ollamaModel;
+
+    const styleRadio = document.querySelector(`input[name="filter-style"][value="${config.filterStyle}"]`);
+    if (styleRadio) styleRadio.checked = true;
 
     const radio = document.querySelector(`input[name="filter-action"][value="${config.filterAction}"]`);
     if (radio) radio.checked = true;
@@ -276,6 +280,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }));
   }
 
+  function updateAiNotice(offline) {
+    document.getElementById('ai-notice').hidden = !(offline && selectedMode !== 'logic');
+  }
+
   function setOllamaStatus(kind, text) {
     ollamaStatus.className = `status-badge ${kind}`;
     const dot = document.createElement('span');
@@ -292,12 +300,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const models = res.models || [];
         setOllamaStatus('connected', `Online (${models.length} models)`);
         setModelOptions(models);
+        updateAiNotice(false);
       } else {
         setOllamaStatus('disconnected', `Offline (${res ? res.error : 'no server'})`);
         setModelOptions([]);
+        updateAiNotice(true);
       }
     } catch (err) {
       setOllamaStatus('disconnected', 'Offline');
+      updateAiNotice(true);
       setModelOptions([]);
     }
   }
@@ -305,6 +316,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 8. Save Settings to Storage
   async function saveSettings(shouldReload = false) {
     const filterAction = document.querySelector('input[name="filter-action"]:checked')?.value || 'hide';
+    const filterStyle = document.querySelector('input[name="filter-style"]:checked')?.value || FOCUSIFY_DEFAULTS.filterStyle;
     const selectedModel = ollamaModelSelect.value || savedModelName;
 
     const newConfig = {
@@ -322,6 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showBadges: showBadgesInput.checked,
       enableTakeaways: enableTakeawaysInput.checked,
       filterAction,
+      filterStyle,
       ollamaEndpoint: ollamaEndpointInput.value.trim(),
       ollamaModel: selectedModel
     };

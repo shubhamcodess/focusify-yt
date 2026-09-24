@@ -17,7 +17,7 @@ class FocusifyLogicEngine {
     const negativeKeywords = this.normalizeList(config.negativeKeywords);
     const whitelistedChannels = this.normalizeList(config.whitelistedChannels);
     const blacklistedChannels = this.normalizeList(config.blacklistedChannels);
-    const threshold = Number(config.threshold ?? 40); // Balanced default threshold (40%)
+    const threshold = Number(config.threshold ?? 40);
     const blockClickbait = Boolean(config.blockClickbait ?? true);
     const educationalSignals = this.normalizeList(config.educationalSignals);
     const clickbaitPhrases = this.normalizeList(config.clickbaitPhrases);
@@ -79,7 +79,8 @@ class FocusifyLogicEngine {
         reason: reasonParts.join('. '),
         engine: 'logic',
         positiveMatches: [],
-        negativeMatches
+        negativeMatches,
+        confident: true
       };
     }
 
@@ -115,8 +116,15 @@ class FocusifyLogicEngine {
       }
     }
 
+    // Semantic-ish overlap: shared word stems between the title and the topic/keywords.
+    let stemOverlap = 0;
+    if (focusGenre || positiveKeywords.length) {
+      const topic = this.stemSet([focusGenre, ...positiveKeywords].join(' '));
+      for (const st of this.stemSet(cleanTitle)) if (topic.has(st)) stemOverlap++;
+    }
+
     const hasUserFocusConfig = Boolean(focusGenre || positiveKeywords.length > 0);
-    const totalPositiveHits = (exactGenreMatch ? 3 : genreHits) + positiveMatches.length;
+    const totalPositiveHits = (exactGenreMatch ? 3 : genreHits) + positiveMatches.length + stemOverlap;
 
     // 3. Balanced Baseline Scoring:
     // If no direct distraction/negative keyword matched, default baseline is 50.
@@ -138,6 +146,12 @@ class FocusifyLogicEngine {
       const boost = Math.min(35, genreHits * 15);
       score += boost;
       reasonParts.push(`Matched ${genreHits} focus topic word(s) (+${boost})`);
+    }
+
+    if (stemOverlap > 0 && !exactGenreMatch && genreHits === 0 && positiveMatches.length === 0) {
+      const boost = Math.min(30, stemOverlap * 12);
+      score += boost;
+      reasonParts.push(`Shares ${stemOverlap} topic word(s) with your focus (+${boost})`);
     }
 
     if (positiveMatches.length > 0) {
@@ -180,8 +194,27 @@ class FocusifyLogicEngine {
       reason: reasonParts.join('. ') || (allow ? 'Sufficient relevance score' : 'Low relevance score'),
       engine: 'logic',
       positiveMatches,
-      negativeMatches
+      negativeMatches,
+      confident: false
     };
+  }
+
+  // Light suffix stripping so "algorithms"/"algorithmic", "designing"/"design" line up.
+  static stem(word) {
+    let w = String(word).toLowerCase();
+    for (const suf of ['ations', 'ation', 'ings', 'ing', 'ics', 'ic', 'ies', 'es', 'ed', 's', 'ly']) {
+      if (w.length > suf.length + 3 && w.endsWith(suf)) { w = w.slice(0, -suf.length); break; }
+    }
+    return w;
+  }
+
+  static get STOPWORDS() {
+    return new Set(['and', 'the', 'for', 'with', 'from', 'into', 'about', 'your', 'you', 'how', 'why', 'what', 'this', 'that', 'are', 'not', 'best', 'new', 'all']);
+  }
+
+  static stemSet(text) {
+    const stop = this.STOPWORDS;
+    return new Set(this.tokenize(text).filter(t => !stop.has(t)).map(t => this.stem(t)));
   }
 
   static normalizeList(input) {

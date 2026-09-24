@@ -14,6 +14,9 @@ const FOCUSIFY_DEFAULTS = {
   clickbaitPhrases: "you won't believe, i spent 24 hours, gone wrong, exposed, what happens if, omg",
   whitelistedChannels: '',
   blacklistedChannels: '',
+  // 'strict' judges videos against the focus topic only (default).
+  // 'discover' also uses your threshold, but lets the AI accept related and adjacent topics.
+  filterStyle: 'strict',
   threshold: 40,
   blockClickbait: true,
   blockShorts: true,
@@ -44,7 +47,7 @@ const FOCUSIFY_DEFAULTS = {
 // Every key that can change a classification result. Used to invalidate caches.
 const FOCUSIFY_SCORING_KEYS = [
   'enabled', 'mode', 'focusGenre', 'positiveKeywords', 'negativeKeywords', 'educationalSignals', 'clickbaitPhrases',
-  'whitelistedChannels', 'blacklistedChannels', 'threshold', 'blockClickbait',
+  'whitelistedChannels', 'blacklistedChannels', 'filterStyle', 'threshold', 'blockClickbait',
   'blockShorts', 'filterCurrentVideo', 'filterAction', 'ollamaModel', 'ollamaEndpoint'
 ];
 

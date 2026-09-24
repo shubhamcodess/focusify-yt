@@ -5,7 +5,8 @@ require('../scripts/defaults.js');
 const Engine = require('../scripts/logic-engine.js');
 
 const D = globalThis.FOCUSIFY_DEFAULTS;
-const cfg = (over = {}) => ({ ...D, ...over });
+test('default filter style is strict', () => assert.equal(D.filterStyle, 'strict'));
+const cfg = (over = {}) => ({ ...D, filterStyle: 'strict', ...over });
 
 const cooking = cfg({
   focusGenre: 'Italian Pasta & Culinary Techniques',
@@ -74,7 +75,7 @@ test('empty metadata is allowed', () => {
 });
 
 test('config hash tracks scoring settings only', () => {
-  const base = focusifyConfigHash(D);
+  const base = focusifyConfigHash(cfg());
   assert.notEqual(base, focusifyConfigHash(cfg({ positiveKeywords: 'x' })));
   assert.notEqual(base, focusifyConfigHash(cfg({ educationalSignals: 'x' })));
   assert.equal(base, focusifyConfigHash(cfg({ showBadges: true, pausedUntil: 5 })));
@@ -167,4 +168,26 @@ test('every file the manifest references exists and ships in the build', () => {
     const top = f.split('/')[0];
     assert.ok(zipped.includes(top), `build script does not package "${top}" (needed for ${f})`);
   }
+});
+
+test('stem overlap: related word forms count as topic matches', () => {
+  const c = cfg({ focusGenre: 'Algorithms and system design', positiveKeywords: '', educationalSignals: '' });
+  const related = Engine.evaluate('Designing scalable systems', 'X', c);
+  const unrelated = Engine.evaluate('Weekend picnic ideas', 'X', c);
+  assert.ok(related.score > unrelated.score);
+  assert.ok(related.reason.includes('topic word'));
+});
+
+test('confidence: only blocked words/channels are confident blocks', () => {
+  const c = cfg({ focusGenre: 'Cooking', blacklistedChannels: 'Bad' });
+  assert.equal(Engine.evaluate('gaming stream', 'X', c).confident, true);
+  assert.equal(Engine.evaluate('anything', 'Bad', c).engine, 'blacklist');
+  assert.equal(Engine.evaluate('random title', 'X', c).confident, false);
+});
+
+test('discover style still honours the threshold and hands borderline videos to the AI', () => {
+  const c = cfg({ filterStyle: 'discover', threshold: 70, focusGenre: 'Cooking' });
+  assert.equal(Engine.evaluate('A history of bridges', 'New Channel', c).allow, false); // no free pass below the threshold
+  const ok = Engine.evaluate('Cooking pasta recipe', 'Chef', cfg({ filterStyle: 'discover', threshold: 40, focusGenre: 'Cooking' }));
+  assert.equal(ok.allow, true);
 });

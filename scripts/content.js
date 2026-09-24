@@ -244,6 +244,8 @@
     if (logic.engine === 'whitelist' || logic.engine === 'blacklist') return { decision: logic, final: true };
     if (currentConfig.mode === 'ai') return { decision: logic, final: false };
     if (logic.negativeMatches && logic.negativeMatches.length > 0) return { decision: logic, final: true };
+    // Discover style: anything the logic engine doesn't flag is shown; the AI isn't asked about topic fit.
+    if (currentConfig.filterStyle === 'discover' && logic.allow) return { decision: logic, final: true };
     const upper = Math.min(95, Number(currentConfig.threshold) + 30);
     if (logic.score >= upper) return { decision: logic, final: true };
     return { decision: logic, final: false };
@@ -298,6 +300,21 @@
       }
     }
 
+    // Newer card markup: pick the first metadata line that is a name (not views, age, or duration).
+    if (!channel) {
+      const skip = /\b(views?|watching|ago|subscribers?|waiting|premiere|live)\b|^[\d:.,]+[KMB]?$/i;
+      const link = el.querySelector('a[href^="/@"], a[href*="/channel/"], a[href*="/c/"]');
+      const linkText = link ? link.textContent.trim() : '';
+      if (linkText && !skip.test(linkText)) {
+        channel = linkText;
+      } else {
+        for (const n of el.querySelectorAll('[class*="metadata"] span, [class*="byline"] span, ytd-channel-name, yt-formatted-string')) {
+          const t = (n.textContent || '').trim();
+          if (t && t.length < 80 && !skip.test(t) && t !== title) { channel = t; break; }
+        }
+      }
+    }
+
     return { title, channel };
   }
 
@@ -322,7 +339,8 @@
     }
 
     if (decisionCache.size >= MAX_LOCAL_CACHE) decisionCache.delete(decisionCache.keys().next().value);
-    decisionCache.set(cacheKey, decision);
+    // Verdicts made without the AI are re-checked later, once Ollama may be back.
+    if (!decision.degraded) decisionCache.set(cacheKey, decision);
     return { decision, hash, fromCache: false };
   }
 
@@ -493,7 +511,8 @@
     if (token !== guardToken) return; // navigated away meanwhile
     if (!fromCache) queueStat(decision, meta.title, meta.channel);
 
-    if (decision.allow) removeCurrentGuard();
+    // Never interrupt a video on a weak, AI-less guess; only on clear signals (blocked word/channel, or the AI).
+    if (decision.allow || (decision.degraded && !decision.confident)) removeCurrentGuard();
     else showCurrentGuard(id, decision, meta.title, meta.channel);
   }
 
@@ -510,10 +529,16 @@
     const existingTakeaway = el.querySelector('.focusify-takeaway-btn');
     if (existingTakeaway) existingTakeaway.remove();
 
-    const thumbContainer = el.querySelector('#thumbnail, ytd-thumbnail, .yt-lockup-view-model-wiz__thumbnail') || el;
+    // Anchor overlays to the thumbnail itself, never the whole card (which would put them over the channel name).
+    const thumbContainer = el.querySelector('#thumbnail, ytd-thumbnail, yt-thumbnail-view-model, .yt-lockup-view-model-wiz__thumbnail, .yt-lockup-view-model__content-image')
+      || el.querySelector('img')?.closest('a, yt-thumbnail-view-model, div')
+      || el;
     if (getComputedStyle(thumbContainer).position === 'static') {
       thumbContainer.style.position = 'relative';
     }
+
+    // Nested card elements can share one thumbnail; keep a single badge and chip.
+    thumbContainer.querySelectorAll(':scope > .focusify-card-badge, :scope > .focusify-takeaway-btn').forEach(n => n.remove());
 
     // Visual Engine Badge
     if (currentConfig.showBadges && decision.engine !== 'none') {

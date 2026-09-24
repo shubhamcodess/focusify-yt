@@ -1,6 +1,6 @@
 {
   "name": "focusify-yt",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Chrome extension that filters YouTube to your current focus topic.",
   "private": true,
   "license": "MIT",

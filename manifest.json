@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Focusify: Distraction-Free YouTube",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Filter YouTube down to your current study topic. Hides distractions and Shorts with local logic and optional on-device AI (Ollama).",
   "icons": {
     "16": "icons/icon-16.png",
