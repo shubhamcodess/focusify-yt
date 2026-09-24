@@ -14,7 +14,7 @@ Focusify is a Chrome extension that keeps YouTube on your topic. Tell it what yo
 - [Development and releasing](#development-and-releasing)
 
 <p align="center">
-  <img src="docs/media/showcase.webp" alt="Focusify on the YouTube home page" width="800">
+  <img src="docs/media/showcase.gif" alt="Focusify filtering the YouTube home feed" width="800">
 </p>
 
 ## What it does
